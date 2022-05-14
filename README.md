@@ -20,6 +20,23 @@ require("telescope").load_extension("emoji")
 :Telescope emoji
 ```
 
+Or you can call it directly
+
+```lua
+-- Default search (Ordinal from your configuration)
+require("telescope").extensions.emoji.search(opts)
+
+-- Search only by category
+require("telescope").extensions.emoji.category(opts)
+
+-- Custom Ordinals Per Call
+require("telescope").extensions.emoji.custom(function(emoji)
+    -- argument emoji is a table.
+    -- {name="", value="", category="", description=""}
+    return emoji.name .. emoji.category
+end, opts)
+```
+
 ## Configuraion
 
 **It's optional.**
@@ -28,11 +45,23 @@ by default
 
 ```lua
 require("telescope-emoji").setup({
-  action = function(emoji)
-    -- argument emoji is a table.
-    -- {name="", value="", cagegory="", description=""}
-    vim.fn.setreg("*", emoji.value)
-    print([[Press p or "*p to paste this emoji]] .. emoji.value)
-  end,
+    -- What to do after a selection
+    action = function(emoji)
+        -- argument emoji is a table.
+        -- {name="", value="", cagegory="", description=""}
+        vim.fn.setreg('"', emoji.value)
+        print("Press p to paste this emoji:", emoji.value)
+    end,
+    default_get_ordinal = function(emoji)
+        -- Messy but allows you to search in any order
+        return table.concat({
+            emoji.name, emoji.category, emoji.description,
+            emoji.name, emoji.description, emoji.category,
+            emoji.category, emoji.name, emoji.description,
+            emoji.category, emoji.description, emoji.name,
+            emoji.description, emoji.name, emoji.category,
+            emoji.description, emoji.category, emoji.name,
+        }, " ")
+    end,
 })
 ```
